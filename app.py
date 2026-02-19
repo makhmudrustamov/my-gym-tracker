@@ -3,8 +3,11 @@ import streamlit as st
 import db
 import uuid
 import datetime
+import time
 
 db.create_table()
+
+
 
 def set_background(image_path):
     if os.path.exists(image_path):
@@ -17,10 +20,21 @@ def set_background(image_path):
 if 'user_id' not in st.session_state:
     st.session_state.user_id = None
 
+if st.session_state.user_id is None:
+    set_background("background.jpg")
+    st.markdown("""
+        <style>
+        [data-testid="stVerticalBlock"] > div:has(div.login-card) { display: flex; justify-content: center; }
+        .login-card { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(15px); border-radius: 20px; padding: 40px; border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.8); width: 100%; max-width: 450px; margin: auto; text-align: center; }
+        h1 { font-family: 'Inter', sans-serif; font-weight: 800; color: #ffffff !important; }
+        .stButton > button { width: 100%; border-radius: 10px; background-color: #ff4b4b; color: white; font-weight: bold; }
+        </style>
+    """, unsafe_allow_html=True)
 
+    
 
     st.markdown('<div class="login-card">', unsafe_allow_html=True)
-    st.title("GYM TRACKER")
+    st.title("PR GYM TRACKER")
     tab1, tab2 = st.tabs(["LOG IN", "JOIN NOW"])
     
     with tab1:
@@ -49,6 +63,8 @@ else:
     # Calendar Selection in Sidebar
     selected_date = st.sidebar.date_input("📅 Choose Date", datetime.date.today())
     day_name = selected_date.strftime("%A")
+    
+
     
     if st.sidebar.button("Logout"):
         st.session_state.user_id = None
@@ -124,3 +140,4 @@ else:
             if st.button(f"🗑️ Delete ", key=f"del{wid}", use_container_width=True):
                 db.delete_workout(wid)
                 st.rerun()
+    
