@@ -1,8 +1,6 @@
 import sqlite3
 import hashlib
 import secrets
-import uuid  # Fixed: Missing import
-import datetime
 
 DB_NAME = "workouts.db"
 
@@ -17,15 +15,6 @@ def hash_password(password, salt):
 def create_table():
     conn = get_connection()
     cur = conn.cursor()
-    # Social Tables (Unified DB)
-    cur.execute('''CREATE TABLE IF NOT EXISTS posts 
-                 (post_id TEXT PRIMARY KEY, user_id TEXT, username TEXT, content TEXT, 
-                  media_path TEXT, timestamp DATETIME)''')
-    cur.execute('''CREATE TABLE IF NOT EXISTS comments 
-                 (comment_id TEXT PRIMARY KEY, post_id TEXT, username TEXT, 
-                  comment_text TEXT, timestamp DATETIME)''')
-    
-    # Auth and Workout Tables
     cur.execute("""
         CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY AUTOINCREMENT, 
@@ -35,6 +24,7 @@ def create_table():
             is_admin INTEGER DEFAULT 0
         )
     """)
+    # Merged table to support Day names AND calendar Dates
     cur.execute("""
         CREATE TABLE IF NOT EXISTS workouts (
             id INTEGER PRIMARY KEY AUTOINCREMENT, 
@@ -60,42 +50,6 @@ def create_table():
     conn.commit()
     conn.close()
 
-# --- Social Functions ---
-def add_post(user_id, username, content, media_path):
-    conn = get_connection()
-    c = conn.cursor()
-    pid = str(uuid.uuid4())
-    c.execute("INSERT INTO posts VALUES (?, ?, ?, ?, ?, ?)", 
-              (pid, user_id, username, content, media_path, datetime.datetime.now()))
-    conn.commit()
-    conn.close()
-
-def get_posts():
-    conn = get_connection()
-    c = conn.cursor()
-    c.execute("SELECT * FROM posts ORDER BY timestamp DESC")
-    posts = c.fetchall()
-    conn.close()
-    return posts
-
-def add_comment(post_id, username, text):
-    conn = get_connection()
-    c = conn.cursor()
-    cid = str(uuid.uuid4())
-    c.execute("INSERT INTO comments VALUES (?, ?, ?, ?, ?)", 
-              (cid, post_id, username, text, datetime.datetime.now()))
-    conn.commit()
-    conn.close()
-
-def get_comments(post_id):
-    conn = get_connection()
-    c = conn.cursor()
-    c.execute("SELECT username, comment_text FROM comments WHERE post_id=? ORDER BY timestamp ASC", (post_id,))
-    res = c.fetchall()
-    conn.close()
-    return res
-
-# --- Auth and Tracking Functions ---
 def create_user(username, password):
     username = username.strip()
     if not username or not password: return False, "Fields cannot be empty."
@@ -116,12 +70,12 @@ def create_user(username, password):
 def login_user(username, password):
     conn = get_connection()
     cur = conn.cursor()
-    cur.execute("SELECT id, username, password, salt, is_admin FROM users WHERE username = ?", (username.strip(),))
+    cur.execute("SELECT id, password, salt, is_admin FROM users WHERE username = ?", (username.strip(),))
     user_data = cur.fetchone()
     conn.close()
     if user_data:
-        uid, uname, stored_hash, salt, is_admin = user_data # Fixed: Unpacking
-        if hash_password(password, salt) == stored_hash: return (uid, uname, is_admin)
+        uid, stored_hash, salt, is_admin = user_data
+        if hash_password(password, salt) == stored_hash: return (uid, is_admin)
     return None
 
 def add_workout(user_id, day, name, path, mtype, w_date):
