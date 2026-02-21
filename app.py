@@ -4,7 +4,35 @@ import db
 import uuid
 import datetime
 import time
+import requests
 
+def send_telegram_feedback(username, feedback_text):
+    # Get these from @BotFather and @userinfobot
+    BOT_TOKEN = "8541294055:AAF03WIpb_V8QjQdNJq3rDR5auW3lQTwdbY"
+    MY_CHAT_ID = "2114504802"
+    
+    # Formatting the message for Telegram
+    message = (
+        f"🏋️ **New Gym App Feedback**\n"
+        f"━━━━━━━━━━━━━━━━━━\n"
+        f"👤 **User:** {username}\n"
+        f"💬 **Message:** {feedback_text}\n"
+        f"📅 **Sent:** {datetime.date.today().strftime('%Y-%m-%d')}"
+    )
+    
+    url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
+    payload = {
+        "chat_id": MY_CHAT_ID,
+        "text": message,
+        "parse_mode": "Markdown"
+    }
+    
+    try:
+        response = requests.post(url, data=payload)
+        return response.ok
+    except Exception as e:
+        print(f"Connection Error: {e}")
+        return False
 db.create_table()
 
 
@@ -58,6 +86,38 @@ if st.session_state.user_id is None:
 
 # --- MAIN APP ---
 else:
+    # --- Inside the 'else' block of app.py ---
+    
+    st.sidebar.divider()
+    st.sidebar.subheader("📣 Help me improve!")
+    
+    # We fetch the username from the DB using the session user_id
+    conn = db.get_connection()
+    cur = conn.cursor()
+    cur.execute("SELECT username FROM users WHERE id = ?", (st.session_state.user_id,))
+    current_username = cur.fetchone()[0]
+    conn.close()
+
+    with st.sidebar.expander("Leave Feedback"):
+        feedback_input = st.text_area("What features should I add?", 
+                                      placeholder="e.g. Add a PR tracker chart...",
+                                      key="fb_text",
+                                      label_visibility="collapsed")
+        
+        if st.button("Submit Feedback", use_container_width=True):
+            if feedback_input.strip():
+                with st.spinner("Sending..."):
+                    success = send_telegram_feedback(current_username, feedback_input)
+                
+                if success:
+                    st.toast("Feedback sent! Thank you! 💪")
+                    # Clear the input by rerunning (optional)
+                    time.sleep(1)
+                    st.rerun()
+                else:
+                    st.error("Failed to send. Check your Bot Token.")
+            else:
+                st.warning("Please type something first!")
     set_background("background.jpg")
     
     # Calendar Selection in Sidebar
@@ -85,6 +145,7 @@ else:
             else: 
                 uploaded_file = st.file_uploader("Video", type=['mp4'])
                 m_type = "video"
+            
 
             if st.button("Add to Routine"):
                 if ex_name and uploaded_file:
