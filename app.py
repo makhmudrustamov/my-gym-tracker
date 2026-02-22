@@ -3,7 +3,7 @@ import os, streamlit as st, db, uuid, datetime, requests, pandas as pd
 # --- CONFIG ---
 BOT_TOKEN = "8541294055:AAF03WIpb_V8QjQdNJq3rDR5auW3lQTwdbY"
 MY_CHAT_ID = "2114504802"
-ADMIN_KEY = "UZB_PR_2024"
+ADMIN_KEY = "UZBEKISTAN2026"
 
 db.create_table()
 
