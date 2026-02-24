@@ -1,27 +1,5 @@
 import os, streamlit as st, db, uuid, datetime, requests, pandas as pd
-st.markdown(
-    """
-    <style>
-    /* target the button that opens/closes the sidebar */
-    [data-testid="stSidebarCollapseButton"] > button {
-        visibility: hidden;
-        position: relative;
-    }
-    
-    /* inject the hamburger symbol */
-    [data-testid="stSidebarCollapseButton"] > button:before {
-        content: '☰'; /* The Hamburger Symbol */
-        visibility: visible;
-        position: absolute;
-        left: 10px;
-        top: 5px;
-        font-size: 24px;
-        color: white; /* Change color to match your theme */
-    }
-    </style>
-    """,
-    unsafe_allow_index=True
-)
+
 
 # --- CONFIG ---
 BOT_TOKEN = "8541294055:AAF03WIpb_V8QjQdNJq3rDR5auW3lQTwdbY"
