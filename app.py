@@ -20,7 +20,7 @@ if "offline_log" not in st.session_state:
 
 # --- AUTHENTICATION ---
 if st.session_state.user_id is None:
-    st.title("PR GYM TRACKER 🇺🇿")
+    st.title("PR-TRACKER")
     t1, t2 = st.tabs(["KIRISH", "RO'YXATDAN O'TISH"])
     with t1:
         u = st.text_input("Username", key="l_u")
@@ -71,7 +71,7 @@ else:
             st.rerun()
 
     # --- ADMIN SECTION ---
-    elif choice == "📊 Admin Panel":
+    elif choice == " Admin Panel":
         st.title("Boshqaruv Markazi")
         
         st.subheader("📬 Foydalanuvchilar xabarlari")
@@ -107,10 +107,10 @@ else:
     # --- WORKOUTS SECTION ---
     elif choice == "Mashg'ulotlar":
         d = st.sidebar.date_input("Sana", datetime.date.today())
-        st.title(f"📅 {d.strftime('%d.%m.%Y')}")
+        st.title(f"{d.strftime('%d.%m.%Y')}")
 
         # --- LOW SIGNAL SOLUTION: OFFLINE LOG ---
-        with st.expander("📝 Offline Rejim (Internet sust bo'lsa)"):
+        with st.expander("Offline Rejim (Internet sust bo'lsa)"):
             st.caption("Mashg'ulot davomida yozib turing, signal chiqqanda saqlang.")
             st.session_state.offline_log = st.text_area("Mashqlar natijasini yozing...", value=st.session_state.offline_log, placeholder="Masalan: Bench 80kg 10ta, 90kg 8ta...")
             if st.button("Bazaga yuborish"):
