@@ -1,6 +1,5 @@
 import os, streamlit as st, db, uuid, datetime, requests, pandas as pd
 
-
 # --- CONFIG ---
 BOT_TOKEN = "8541294055:AAF03WIpb_V8QjQdNJq3rDR5auW3lQTwdbY"
 MY_CHAT_ID = "2114504802"
@@ -20,7 +19,7 @@ if "offline_log" not in st.session_state:
 
 # --- AUTHENTICATION ---
 if st.session_state.user_id is None:
-    st.title("PR-TRACKER")
+    st.title("PR GYM TRACKER 🇺🇿")
     t1, t2 = st.tabs(["KIRISH", "RO'YXATDAN O'TISH"])
     with t1:
         u = st.text_input("Username", key="l_u")
@@ -71,7 +70,7 @@ else:
             st.rerun()
 
     # --- ADMIN SECTION ---
-    elif choice == " Admin Panel":
+    elif choice == "📊 Admin Panel":
         st.title("Boshqaruv Markazi")
         
         st.subheader("📬 Foydalanuvchilar xabarlari")
@@ -107,43 +106,21 @@ else:
     # --- WORKOUTS SECTION ---
     elif choice == "Mashg'ulotlar":
         d = st.sidebar.date_input("Sana", datetime.date.today())
-        st.title(f"{d.strftime('%d.%m.%Y')}")
+        st.title(f"📅 {d.strftime('%d.%m.%Y')}")
 
-        # --- DAILY NOTES SECTION ---
-        st.divider()
-        st.subheader("📝 Kunlik Qaydlar")
+        # --- LOW SIGNAL SOLUTION: OFFLINE LOG ---
+        with st.expander("📝 Offline Rejim (Internet sust bo'lsa)"):
+            st.caption("Mashg'ulot davomida yozib turing, signal chiqqanda saqlang.")
+            st.session_state.offline_log = st.text_area("Mashqlar natijasini yozing...", value=st.session_state.offline_log, placeholder="Masalan: Bench 80kg 10ta, 90kg 8ta...")
+            if st.button("Bazaga yuborish"):
+                if st.session_state.offline_log.strip():
+                    db.send_message(st.session_state.user_id, 1, f"OFFLINE LOG ({d}): {st.session_state.offline_log}")
+                    st.session_state.offline_log = ""
+                    st.success("Ma'lumot yuborildi! Admin ko'rib chiqadi.")
         
-        # Fetch existing note for this specific user and date
-        current_note = db.get_daily_note(st.session_state.user_id, d)
-        
-        with st.container(border=True):
-            note_input = st.text_area(
-                "Bugun uchun eslatmalar yoki reja:",
-                value=current_note,
-                placeholder="Masalan: Bugun uyqu kam bo'ldi, vitaminlarni ichish esdan chiqmasin...",
-                height=150,
-                help="Bu qaydlar faqat sizga ko'rinadi va tanlangan sana uchun saqlanadi."
-            )
-            
-            col1, col2 = st.columns([1, 1])
-            if col1.button("💾 Qaydni Saqlash", use_container_width=True):
-                db.save_daily_note(st.session_state.user_id, d, note_input)
-                st.success("Qayd saqlandi!")
-            
-            if col2.button("📋 Oxirgi qaydni nusxalash", use_container_width=True):
-                # Feature: Pulls the note from the previous day to save time
-                yesterday = d - datetime.timedelta(days=1)
-                prev_note = db.get_daily_note(st.session_state.user_id, yesterday)
-                if prev_note:
-                    st.session_state.offline_log = prev_note # Temp storage for rerun
-                    db.save_daily_note(st.session_state.user_id, d, prev_note)
-                    st.rerun()
-                else:
-                    st.warning("Kecha uchun qayd topilmadi.")
-
         st.divider()
 
-        with st.expander("Mashq qo'shish"):
+        with st.expander("➕ Mashq qo'shish"):
             name = st.text_input("Mashq nomi (Masalan: Bench Press)")
             use_m = st.toggle("Rasm yoki Video yuklash")
             path, mtype = None, "none"
@@ -161,7 +138,7 @@ else:
 
         workouts = db.get_workouts(st.session_state.user_id, d)
         for wid, wname, wpath, wtype in workouts:
-            with st.expander(f" {wname.upper()}", expanded=True):
+            with st.expander(f"🏋️ {wname.upper()}", expanded=True):
                 if wpath:
                     if wtype == "video": st.video(wpath)
                     else: st.image(wpath)
@@ -181,7 +158,7 @@ else:
                 for s_n, s_w, s_r in sets_data:
                     st.write(f"✅ **{s_n}-set:** {s_w} kg — {s_r} marta")
                 
-                if st.button(" Mashqni o'chirish", key=f"del_{wid}"):
+                if st.button("🗑️ Mashqni o'chirish", key=f"del_{wid}"):
                     db.delete_workout(wid)
                     st.rerun()
 
