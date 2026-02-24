@@ -109,16 +109,38 @@ else:
         d = st.sidebar.date_input("Sana", datetime.date.today())
         st.title(f"{d.strftime('%d.%m.%Y')}")
 
-        # --- LOW SIGNAL SOLUTION: OFFLINE LOG ---
-        with st.expander("Offline Rejim (Internet sust bo'lsa)"):
-            st.caption("Mashg'ulot davomida yozib turing, signal chiqqanda saqlang.")
-            st.session_state.offline_log = st.text_area("Mashqlar natijasini yozing...", value=st.session_state.offline_log, placeholder="Masalan: Bench 80kg 10ta, 90kg 8ta...")
-            if st.button("Bazaga yuborish"):
-                if st.session_state.offline_log.strip():
-                    db.send_message(st.session_state.user_id, 1, f"OFFLINE LOG ({d}): {st.session_state.offline_log}")
-                    st.session_state.offline_log = ""
-                    st.success("Ma'lumot yuborildi! Admin ko'rib chiqadi.")
+        # --- DAILY NOTES SECTION ---
+        st.divider()
+        st.subheader("📝 Kunlik Qaydlar")
         
+        # Fetch existing note for this specific user and date
+        current_note = db.get_daily_note(st.session_state.user_id, d)
+        
+        with st.container(border=True):
+            note_input = st.text_area(
+                "Bugun uchun eslatmalar yoki reja:",
+                value=current_note,
+                placeholder="Masalan: Bugun uyqu kam bo'ldi, vitaminlarni ichish esdan chiqmasin...",
+                height=150,
+                help="Bu qaydlar faqat sizga ko'rinadi va tanlangan sana uchun saqlanadi."
+            )
+            
+            col1, col2 = st.columns([1, 1])
+            if col1.button("💾 Qaydni Saqlash", use_container_width=True):
+                db.save_daily_note(st.session_state.user_id, d, note_input)
+                st.success("Qayd saqlandi!")
+            
+            if col2.button("📋 Oxirgi qaydni nusxalash", use_container_width=True):
+                # Feature: Pulls the note from the previous day to save time
+                yesterday = d - datetime.timedelta(days=1)
+                prev_note = db.get_daily_note(st.session_state.user_id, yesterday)
+                if prev_note:
+                    st.session_state.offline_log = prev_note # Temp storage for rerun
+                    db.save_daily_note(st.session_state.user_id, d, prev_note)
+                    st.rerun()
+                else:
+                    st.warning("Kecha uchun qayd topilmadi.")
+
         st.divider()
 
         with st.expander("Mashq qo'shish"):
