@@ -16,19 +16,7 @@ def hash_password(password, salt):
 def create_table():
     conn = get_connection()
     cur = conn.cursor()
-
-    # ADD THIS LINE:
-    cur.execute("""
-        CREATE TABLE IF NOT EXISTS daily_notes (
-            user_id INTEGER, 
-            date TEXT, 
-            content TEXT, 
-            PRIMARY KEY (user_id, date)
-        )
-    """)
     
-    conn.commit()
-    conn.close()
     # 1. Standard Tables
     cur.execute("""CREATE TABLE IF NOT EXISTS users (
         id INTEGER PRIMARY KEY AUTOINCREMENT, 
@@ -189,27 +177,3 @@ def delete_workout(wid):
     cur.execute("DELETE FROM workouts WHERE id = ?", (wid,))
     conn.commit()
     conn.close()
-# Add these to your db.py file:
-
-def save_daily_note(user_id, date, content):
-    conn = sqlite3.connect("database.db") # Ensure your DB name matches
-    cur = conn.cursor()
-    # Using 'REPLACE' or a check to see if note exists for that day
-    cur.execute("""
-        INSERT INTO daily_notes (user_id, date, content) 
-        VALUES (?, ?, ?) 
-        ON CONFLICT(user_id, date) DO UPDATE SET content=excluded.content
-    """, (user_id, date, content))
-    conn.commit()
-    conn.close()
-
-def get_daily_note(user_id, date):
-    conn = sqlite3.connect("database.db")
-    cur = conn.cursor()
-    cur.execute("SELECT content FROM daily_notes WHERE user_id = ? AND date = ?", (user_id, date))
-    res = cur.fetchone()
-    conn.close()
-    return res[0] if res else ""
-
-# Update your db.create_table() to include:
-# cur.execute("CREATE TABLE IF NOT EXISTS daily_notes (user_id INTEGER, date TEXT, content TEXT, PRIMARY KEY (user_id, date))")
