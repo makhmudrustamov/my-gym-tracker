@@ -16,7 +16,19 @@ def hash_password(password, salt):
 def create_table():
     conn = get_connection()
     cur = conn.cursor()
+
+    # ADD THIS LINE:
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS daily_notes (
+            user_id INTEGER, 
+            date TEXT, 
+            content TEXT, 
+            PRIMARY KEY (user_id, date)
+        )
+    """)
     
+    conn.commit()
+    conn.close()
     # 1. Standard Tables
     cur.execute("""CREATE TABLE IF NOT EXISTS users (
         id INTEGER PRIMARY KEY AUTOINCREMENT, 
