@@ -19,7 +19,7 @@ if "offline_log" not in st.session_state:
 
 # --- AUTHENTICATION ---
 if st.session_state.user_id is None:
-    st.title("PR GYM TRACKER 🇺🇿")
+    st.title("PR-TRACKER")
     t1, t2 = st.tabs(["KIRISH", "RO'YXATDAN O'TISH"])
     with t1:
         u = st.text_input("Username", key="l_u")
@@ -106,10 +106,10 @@ else:
     # --- WORKOUTS SECTION ---
     elif choice == "Mashg'ulotlar":
         d = st.sidebar.date_input("Sana", datetime.date.today())
-        st.title(f"📅 {d.strftime('%d.%m.%Y')}")
+        st.title(f"{d.strftime('%d.%m.%Y')}")
 
         # --- LOW SIGNAL SOLUTION: OFFLINE LOG ---
-        with st.expander("📝 Offline Rejim (Internet sust bo'lsa)"):
+        with st.expander("Offline Rejim (Internet sust bo'lsa)"):
             st.caption("Mashg'ulot davomida yozib turing, signal chiqqanda saqlang.")
             st.session_state.offline_log = st.text_area("Mashqlar natijasini yozing...", value=st.session_state.offline_log, placeholder="Masalan: Bench 80kg 10ta, 90kg 8ta...")
             if st.button("Bazaga yuborish"):
@@ -120,7 +120,7 @@ else:
         
         st.divider()
 
-        with st.expander("➕ Mashq qo'shish"):
+        with st.expander("Mashq qo'shish"):
             name = st.text_input("Mashq nomi (Masalan: Bench Press)")
             use_m = st.toggle("Rasm yoki Video yuklash")
             path, mtype = None, "none"
@@ -138,7 +138,7 @@ else:
 
         workouts = db.get_workouts(st.session_state.user_id, d)
         for wid, wname, wpath, wtype in workouts:
-            with st.expander(f"🏋️ {wname.upper()}", expanded=True):
+            with st.expander(f"{wname.upper()}", expanded=True):
                 if wpath:
                     if wtype == "video": st.video(wpath)
                     else: st.image(wpath)
@@ -158,7 +158,7 @@ else:
                 for s_n, s_w, s_r in sets_data:
                     st.write(f"✅ **{s_n}-set:** {s_w} kg — {s_r} marta")
                 
-                if st.button("🗑️ Mashqni o'chirish", key=f"del_{wid}"):
+                if st.button("Mashqni o'chirish", key=f"del_{wid}"):
                     db.delete_workout(wid)
                     st.rerun()
 
