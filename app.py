@@ -1,4 +1,27 @@
 import os, streamlit as st, db, uuid, datetime, requests, pandas as pd
+st.markdown(
+    """
+    <style>
+    /* target the button that opens/closes the sidebar */
+    [data-testid="stSidebarCollapseButton"] > button {
+        visibility: hidden;
+        position: relative;
+    }
+    
+    /* inject the hamburger symbol */
+    [data-testid="stSidebarCollapseButton"] > button:before {
+        content: '☰'; /* The Hamburger Symbol */
+        visibility: visible;
+        position: absolute;
+        left: 10px;
+        top: 5px;
+        font-size: 24px;
+        color: white; /* Change color to match your theme */
+    }
+    </style>
+    """,
+    unsafe_allow_index=True
+)
 
 # --- CONFIG ---
 BOT_TOKEN = "8541294055:AAF03WIpb_V8QjQdNJq3rDR5auW3lQTwdbY"
@@ -120,7 +143,7 @@ else:
         
         st.divider()
 
-        with st.expander("➕ Mashq qo'shish"):
+        with st.expander("Mashq qo'shish"):
             name = st.text_input("Mashq nomi (Masalan: Bench Press)")
             use_m = st.toggle("Rasm yoki Video yuklash")
             path, mtype = None, "none"
@@ -138,7 +161,7 @@ else:
 
         workouts = db.get_workouts(st.session_state.user_id, d)
         for wid, wname, wpath, wtype in workouts:
-            with st.expander(f"🏋️ {wname.upper()}", expanded=True):
+            with st.expander(f" {wname.upper()}", expanded=True):
                 if wpath:
                     if wtype == "video": st.video(wpath)
                     else: st.image(wpath)
@@ -158,7 +181,7 @@ else:
                 for s_n, s_w, s_r in sets_data:
                     st.write(f"✅ **{s_n}-set:** {s_w} kg — {s_r} marta")
                 
-                if st.button("🗑️ Mashqni o'chirish", key=f"del_{wid}"):
+                if st.button(" Mashqni o'chirish", key=f"del_{wid}"):
                     db.delete_workout(wid)
                     st.rerun()
 
